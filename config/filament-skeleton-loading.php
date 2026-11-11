@@ -16,4 +16,12 @@ return [
      */
     'defer_tables' => (bool) env('SKELETON_LOADING_DEFER_TABLES', false),
 
+    /*
+     * Skeleton rows while a loaded table updates (changing page, filtering, searching, sorting), on
+     * every table of every panel that uses the plugin, instead of the old rows staying on screen.
+     * Uses Filament's `loadingSkeleton()`. Only those updates: the first load and the other
+     * skeletons stay as they are. The plugin's `showSkeletonsOnTableUpdate()` overrides this per panel.
+     */
+    'show_skeletons_on_table_update' => (bool) env('SKELETON_LOADING_SHOW_ON_TABLE_UPDATE', false),
+
 ];

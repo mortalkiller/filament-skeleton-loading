@@ -43,6 +43,7 @@ All of them return the plugin, so they chain.
 | `selectSearchSkeletons(bool $condition = true): self` | Skeleton lines while a searchable select waits for its options (off by default). |
 | `globalSearchSkeletons(bool $condition = true): self` | Skeleton lines under the global search field while it waits for results (off by default). |
 | `deferTables(bool\|Closure $condition = true): self` | Call `deferLoading()` on the panel's tables. A `Closure(Table): bool` decides per table. Not called: the `defer_tables` setting decides. |
+| `showSkeletonsOnTableUpdate(bool\|Closure $condition = true): self` | Call `loadingSkeleton()` on the panel's tables, so searching, sorting, filtering and changing page show skeleton rows. A `Closure(Table): bool` decides per table. Not called: the `show_skeletons_on_table_update` setting decides. |
 
 An explicit size takes precedence over the theme. Named sizes from `xs` to `4xl` resolve against the matching theme token. With `rounded()` omitted, the package uses `--fsl-bone-radius`, then `--radius-md`, then `6px`.
 
@@ -63,7 +64,7 @@ SkeletonLoadingPlugin::make()->selectSearchSkeletons(); // Select search only
 
 ## Native loading states
 
-Tables that already enable Filament's `loadingSkeleton()` inherit the panel's skeleton radius and colours. The initial placeholder for a deferred table follows the visible columns or content grid when Filament exposes table data to the content hook. Older Filament versions use the fixed placeholder.
+Tables that enable Filament's `loadingSkeleton()`, on the table or through `showSkeletonsOnTableUpdate()`, inherit the panel's skeleton radius and colours. The initial placeholder for a deferred table follows the visible columns or content grid when Filament exposes table data to the content hook. Older Filament versions use the fixed placeholder.
 
 ## Deferred schema placeholder
 
@@ -72,4 +73,4 @@ The package adds `skeletonPlaceholder(SchemaPlaceholder $placeholder): Schema` t
 ## Lifecycle
 
 - `register(Panel $panel)` loads the stylesheet through the panel's `STYLES_AFTER` render hook, adds the page loader to its `BODY_END` render hook when it is on, and a style that hides the shimmer when `shimmer(false)` is set.
-- `boot(Panel $panel)` configures every table built while that panel is current, so `deferTables()` and the `defer_tables` setting apply only to the panels that use the plugin.
+- `boot(Panel $panel)` configures every table built while that panel is current, so `deferTables()`, `showSkeletonsOnTableUpdate()` and their settings apply only to the panels that use the plugin.

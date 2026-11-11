@@ -78,7 +78,20 @@ SkeletonLoadingPlugin::make()
     ->deferTables(fn (Table $table): bool => $table->getLivewire() instanceof ListRecords);
 ```
 
-On Filament versions with `loadingSkeleton()`, enable it on a table to get the package's styling while searching, sorting, filtering or paginating. The package leaves this choice to each table.
+Deferral only covers the first load. While a loaded table searches, sorts, filters or changes page, Filament keeps the old rows on screen unless the table has `loadingSkeleton()`. Enable it on a table to get skeleton rows in the package's style:
+
+```php
+return $table
+    ->loadingSkeleton()
+    ->columns([/* ... */]);
+```
+
+or on every table of the panel with `showSkeletonsOnTableUpdate()` or the `show_skeletons_on_table_update` setting (both off by default). They change only these updates, not the first load or the package's other skeletons. A closure decides per table:
+
+```php
+SkeletonLoadingPlugin::make()
+    ->showSkeletonsOnTableUpdate(fn (Table $table): bool => $table->getLivewire() instanceof ListRecords);
+```
 
 ## Rounded placeholders
 

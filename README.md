@@ -161,6 +161,13 @@ SkeletonLoadingPlugin::make()
     ->deferTables(fn (Table $table): bool => $table->getLivewire() instanceof ListRecords);
 ```
 
+Deferral only covers the first load. To also show skeleton rows while a loaded table changes page, filters, searches or sorts, turn on Filament's `loadingSkeleton()` on the table, or on every table of the panel from the plugin (off by default; a closure decides per table). It changes only those updates, not the first load or the other skeletons:
+
+```php
+SkeletonLoadingPlugin::make()
+    ->showSkeletonsOnTableUpdate();
+```
+
 ## Page loader
 
 Off by default. When on, leaving for another page of the panel (a link or a plain form) shows a full-screen loader, but only if the next page takes longer than the delay, so fast pages never flash. Livewire requests (actions, filters, polling) and links with a `download` attribute never show it. When the browser stays on the page after all (a cancelled "leave page?" prompt, a link that downloads a file), a click or Escape hides it, and it hides itself after 10 seconds.
@@ -190,6 +197,7 @@ Global settings, in `.env` (or publish the config with `php artisan vendor:publi
 | --- | --- | --- | --- |
 | `enabled` | `SKELETON_LOADING_ENABLED` | `true` | Off: Filament's own grey placeholder and spinner everywhere, the trait included, and no page loader. |
 | `defer_tables` | `SKELETON_LOADING_DEFER_TABLES` | `false` | Every table of the panels using the plugin loads after the page, with skeleton rows. |
+| `show_skeletons_on_table_update` | `SKELETON_LOADING_SHOW_ON_TABLE_UPDATE` | `false` | Every table of the panels using the plugin shows skeleton rows while it searches, sorts, filters or changes page. |
 
 Plugin methods, per panel:
 
@@ -201,6 +209,7 @@ Plugin methods, per panel:
 | `pageLoaderDelay(int $milliseconds)` | `300` | How long a page may take before the loader shows. |
 | `pageLoaderLabel(string\|Closure $label)` | "Loading…" (en, pt, pt_PT, pt_BR) | Text under the symbol, also read by screen readers. |
 | `deferTables(bool\|Closure $condition = true)` | the `defer_tables` setting | Calls `deferLoading()` on the panel's tables; a closure decides per table. |
+| `showSkeletonsOnTableUpdate(bool\|Closure $condition = true)` | the `show_skeletons_on_table_update` setting | Calls `loadingSkeleton()` on the panel's tables; a closure decides per table. |
 | `rounded(int\|string $size = 'md')` | the theme's radius | Corner radius of the skeletons: `none`, `xs` to `4xl`, `full`, or pixels (`8`, `'2.5px'`). |
 | `selectSearchSkeletons(bool $condition = true)` | off | Skeleton lines while a searchable select waits for its options. |
 | `globalSearchSkeletons(bool $condition = true)` | off | Skeleton lines under the global search field while it waits for results. |

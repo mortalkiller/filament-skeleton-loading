@@ -11,6 +11,7 @@ description: Package config, view and translation namespaces, and CSS hooks.
 | --- | --- | --- |
 | `enabled` | `SKELETON_LOADING_ENABLED` | `true` |
 | `defer_tables` | `SKELETON_LOADING_DEFER_TABLES` | `false` |
+| `show_skeletons_on_table_update` | `SKELETON_LOADING_SHOW_ON_TABLE_UPDATE` | `false` |
 
 ## Views
 

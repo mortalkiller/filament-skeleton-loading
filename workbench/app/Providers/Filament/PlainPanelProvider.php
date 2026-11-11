@@ -14,6 +14,7 @@ use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
+use Workbench\App\Filament\Pages\Invoices;
 use Workbench\App\Filament\Pages\Orders;
 use Workbench\App\Filament\Pages\Reports;
 use Workbench\App\Filament\Widgets\ChannelShare;
@@ -33,6 +34,7 @@ final class PlainPanelProvider extends PanelProvider
             ->pages([
                 Dashboard::class,
                 Orders::class,
+                Invoices::class,
                 Reports::class,
             ])
             ->widgets([

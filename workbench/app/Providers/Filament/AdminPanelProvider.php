@@ -15,6 +15,7 @@ use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 use MortalKiller\FilamentSkeletonLoading\SkeletonLoadingPlugin;
+use Workbench\App\Filament\Pages\Invoices;
 use Workbench\App\Filament\Pages\Orders;
 use Workbench\App\Filament\Pages\Reports;
 use Workbench\App\Filament\Widgets\ChannelShare;
@@ -34,6 +35,7 @@ final class AdminPanelProvider extends PanelProvider
             ->pages([
                 Dashboard::class,
                 Orders::class,
+                Invoices::class,
                 Reports::class,
             ])
             ->widgets([
@@ -45,7 +47,10 @@ final class AdminPanelProvider extends PanelProvider
             ->plugin(
                 SkeletonLoadingPlugin::make()
                     ->pageLoader()
-                    ->pageLoaderDelay(300),
+                    ->pageLoaderDelay(300)
+                    // WORKBENCH_SHIMMER=0 and WORKBENCH_TABLE_UPDATE_SKELETONS=0 show the demo without them.
+                    ->shimmer(getenv('WORKBENCH_SHIMMER') !== '0')
+                    ->showSkeletonsOnTableUpdate(getenv('WORKBENCH_TABLE_UPDATE_SKELETONS') !== '0'),
             )
             ->middleware([
                 EncryptCookies::class,

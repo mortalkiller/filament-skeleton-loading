@@ -48,6 +48,9 @@ final class SkeletonLoadingPlugin implements Plugin
     /** @var bool|Closure(Table): bool|null null: the `defer_tables` setting decides */
     private bool|Closure|null $deferTables = null;
 
+    /** @var bool|Closure(Table): bool|null null: the `show_skeletons_on_table_update` setting decides */
+    private bool|Closure|null $showSkeletonsOnTableUpdate = null;
+
     public static function make(): self
     {
         return app(self::class);
@@ -208,6 +211,22 @@ final class SkeletonLoadingPlugin implements Plugin
         return $this;
     }
 
+    /**
+     * Skeleton rows while a loaded table updates: changing page or records per page, filtering,
+     * searching, sorting, switching tabs or grouping (Filament's `loadingSkeleton()`), drawn in the
+     * panel's skeleton style. Only those updates: the first load and the package's other skeletons
+     * stay as they are. Off by default. A closure receives the table and decides per table. Not
+     * called: the `show_skeletons_on_table_update` setting decides (env SKELETON_LOADING_SHOW_ON_TABLE_UPDATE).
+     *
+     * @param  bool|Closure(Table): bool  $condition
+     */
+    public function showSkeletonsOnTableUpdate(bool|Closure $condition = true): self
+    {
+        $this->showSkeletonsOnTableUpdate = $condition;
+
+        return $this;
+    }
+
     public function register(Panel $panel): void
     {
         if (self::isEnabled()) {
@@ -311,15 +330,25 @@ final class SkeletonLoadingPlugin implements Plugin
                 return;
             }
 
-            $condition = $this->deferTables ?? (bool) config('filament-skeleton-loading.defer_tables', false);
-
-            if ($condition instanceof Closure) {
-                $condition = (bool) $condition($table);
-            }
-
-            if ($condition) {
+            if ($this->appliesTo($table, $this->deferTables, 'defer_tables')) {
                 $table->deferLoading();
             }
+
+            if ($this->appliesTo($table, $this->showSkeletonsOnTableUpdate, 'show_skeletons_on_table_update')) {
+                $table->loadingSkeleton();
+            }
         });
+    }
+
+    /**
+     * A plugin option wins over its setting; a closure receives the table and decides.
+     *
+     * @param  bool|Closure(Table): bool|null  $option
+     */
+    private function appliesTo(Table $table, bool|Closure|null $option, string $setting): bool
+    {
+        $condition = $option ?? (bool) config("filament-skeleton-loading.{$setting}", false);
+
+        return $condition instanceof Closure ? (bool) $condition($table) : $condition;
     }
 }
