@@ -155,10 +155,19 @@
     --fsl-shine: rgb(255 255 255 / 0.07);
 }
 
+/* Keep Filament's accessible label and lazy-schema error visible; only hide loading visuals. */
 .fi-ta-table-loading-ctn > :not(.fi-sr-only),
 .fi-no-notifications-loading-ctn > :not(.fi-sr-only),
-.fi-sc-loading > :not(.fi-sr-only) {
+.fi-sc-loading > :not(.fi-sr-only):not(.fi-sc-loading-indicator):not(.fi-sc-loading-error),
+.fi-sc-loading > .fi-sc-loading-indicator > :not(.fi-sr-only) {
     display: none !important;
+}
+
+/* Filament sets aria-busy=false on a failed lazy schema and changes its role to alert. */
+.fi-sc-loading[aria-busy="false"]::before,
+.fi-sc-loading[aria-busy="false"]::after {
+    display: none;
+    animation: none;
 }
 
 .fi-ta-table-loading-ctn::after,
