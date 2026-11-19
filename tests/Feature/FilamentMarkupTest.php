@@ -78,6 +78,30 @@ it('finds only the loading indicator inside the lazy schema container', function
 
     $deferredHtml = substr($source, (int) strpos($source, "'fi-sc-loading'"));
 
+    // Newer Filament versions keep the accessible label inside the indicator and render
+    // a separate error message when loading fails. Both must survive our CSS overrides.
+    if (str_contains($deferredHtml, 'class="fi-sc-loading-indicator"')) {
+        expect($deferredHtml)
+            ->toContain('x-show="! hasSchemaLoadingFailed"')
+            ->toContain('x-show="hasSchemaLoadingFailed"')
+            ->toContain('class="fi-sc-loading-error"');
+
+        if (str_contains($deferredHtml, 'class="fi-loading-placeholder-content"')) {
+            // Newest markup wraps its loading placeholder and has a screen-reader label.
+            expect($deferredHtml)->toContain('class="fi-sr-only"');
+        } else {
+            // Earlier releases have an inline loading icon and a plain text label.
+            expect($deferredHtml)
+                ->toContain('generate_loading_indicator_html(size: IconSize::Small)')
+                ->toContain("<?= e(__('filament::loading.label')) ?>");
+        }
+
+        expect($source)->toContain("'x-bind:aria-busy' => \"hasSchemaLoadingFailed ? 'false' : 'true'\"");
+
+        return;
+    }
+
+    // Older Filament releases render a loading indicator directly inside the container.
     expect(loadingContainerExtras($deferredHtml, '<div <?= $attributes->toHtml() ?>'))->toBe('');
 });
 
