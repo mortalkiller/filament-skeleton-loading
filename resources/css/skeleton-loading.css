@@ -159,8 +159,20 @@
 .fi-ta-table-loading-ctn > :not(.fi-sr-only),
 .fi-no-notifications-loading-ctn > :not(.fi-sr-only),
 .fi-sc-loading > :not(.fi-sr-only):not(.fi-sc-loading-indicator):not(.fi-sc-loading-error),
-.fi-sc-loading > .fi-sc-loading-indicator > :not(.fi-sr-only) {
+.fi-sc-loading > .fi-sc-loading-indicator > .fi-loading-indicator,
+.fi-sc-loading > .fi-sc-loading-indicator > .fi-loading-placeholder-content {
     display: none !important;
+}
+
+/* Older Filament versions show a visible loading label alongside the icon. Keep it
+   accessible to screen readers without placing it over the skeleton placeholders. */
+.fi-sc-loading > .fi-sc-loading-indicator > span:not(.fi-sr-only) {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
 }
 
 /* Filament sets aria-busy=false on a failed lazy schema and changes its role to alert. */
