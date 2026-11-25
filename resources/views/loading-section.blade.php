@@ -1,5 +1,6 @@
 @php
     use Filament\Support\View\ComponentAttributeBag;
+    use Illuminate\Support\Facades\Lang;
 @endphp
 
 <div
@@ -13,7 +14,7 @@
     }}
 >
     <span class="fi-sr-only">
-        {{ $loadingLabel ?? __('filament::components/loading-section.label') }}
+        {{ $loadingLabel ?? __(Lang::has('filament::loading.label') ? 'filament::loading.label' : 'filament::components/loading-section.label') }}
     </span>
 
     <span class="fsl-bone fsl-title" aria-hidden="true"></span>
