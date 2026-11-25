@@ -3,6 +3,7 @@
     'columnSpan' => [],
     'columnStart' => [],
     'height' => null,
+    'loadingPlaceholder' => null,
     'loadingLabel' => null,
 ])
 
@@ -11,7 +12,7 @@
     use MortalKiller\FilamentSkeletonLoading\SkeletonLoadingServiceProvider;
 
     // Choose the view without Blade conditionals so Livewire's morph markers never precede the root.
-    $loadingSectionView = SkeletonLoadingPlugin::current()
+    $loadingSectionView = SkeletonLoadingPlugin::current() && ($loadingPlaceholder === null)
         ? 'filament-skeleton-loading::loading-section'
         : SkeletonLoadingServiceProvider::FILAMENT_VIEWS.'::components.loading-section';
 @endphp
