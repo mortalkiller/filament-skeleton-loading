@@ -10,6 +10,8 @@ declare(strict_types=1);
  */
 
 use Composer\InstalledVersions;
+use Illuminate\Support\Facades\Lang;
+use Illuminate\Support\HtmlString;
 use MortalKiller\FilamentSkeletonLoading\Tests\Fixtures\StockWidget;
 
 function filamentSource(string $package, string $path): string
@@ -57,13 +59,65 @@ it('overrides the loading section with the same props as Filament', function () 
     $filament = filamentSource('filament/support', 'resources/views/components/loading-section.blade.php');
     $override = (string) file_get_contents(__DIR__.'/../../resources/views/overrides/components/loading-section.blade.php');
 
-    expect(bladeProps($override))->toEqualCanonicalizing(bladeProps($filament));
+    $filamentProps = bladeProps($filament);
+    $overrideProps = bladeProps($override);
+
+    // Filament 4.17 and 5.12 added an optional native loading placeholder.
+    if (! in_array('loadingPlaceholder', $filamentProps, true)) {
+        $version = (string) InstalledVersions::getVersion('filament/support');
+        $minimum = str_starts_with($version, '4.') ? '4.17.0' : '5.12.0';
+
+        expect(version_compare($version, $minimum, '<'))->toBeTrue();
+        expect($overrideProps)->toContain('loadingPlaceholder');
+        $overrideProps = array_values(array_diff($overrideProps, ['loadingPlaceholder']));
+    }
+
+    expect($overrideProps)->toEqualCanonicalizing($filamentProps);
+});
+
+it('keeps the loading label accessible across supported Filament versions', function () {
+    $key = Lang::has('filament::loading.label') ? 'filament::loading.label' : 'filament::components/loading-section.label';
+
+    expect(view('filament::components.loading-section')->render())->toContain(e(__($key)))
+        ->and(view('filament::components.loading-section', ['loadingLabel' => 'Custom label'])->render())->toContain('Custom label');
+});
+
+it('preserves an explicit native loading placeholder when Filament supports it', function () {
+    $filament = filamentSource('filament/support', 'resources/views/components/loading-section.blade.php');
+
+    if (! in_array('loadingPlaceholder', bladeProps($filament), true)) {
+        expect(view('filament::components.loading-section')->render())->toContain('fsl-skeleton--generic');
+
+        return;
+    }
+
+    $html = view('filament::components.loading-section', [
+        'loadingPlaceholder' => new HtmlString('<span>Custom placeholder</span>'),
+    ])->render();
+
+    expect($html)->toContain('<span>Custom placeholder</span>')
+        ->not->toContain('fsl-skeleton--generic');
 });
 
 it('finds only the loading indicator inside the deferred table container', function () {
-    $source = filamentSource('filament/tables', 'resources/views/index.blade.php');
+    $legacyView = 'resources/views/index.blade.php';
 
-    expect(loadingContainerExtras($source, 'class="fi-ta-table-loading-ctn"'))->toBe('');
+    if (is_readable(InstalledVersions::getInstallPath('filament/tables').'/'.$legacyView)) {
+        $source = filamentSource('filament/tables', $legacyView);
+
+        expect(loadingContainerExtras($source, 'class="fi-ta-table-loading-ctn"'))->toBe('');
+
+        return;
+    }
+
+    // Recent versions render the table in PHP, keeping the loading visuals in a dedicated wrapper.
+    $source = filamentSource('filament/tables', 'src/Table/Concerns/HasContent.php');
+    $pattern = '~class="fi-ta-table-loading-ctn"\s*>\s*<span class="fi-sr-only">.*?</span>\s*<div aria-hidden="true" class="fi-loading-placeholder-content">((?:(?!</?div\b).)*)</div>\s*</div>~s';
+
+    expect(preg_match($pattern, $source, $match))->toBe(1);
+    expect($match[1])
+        ->toContain('$this->getLoadingPlaceholder()')
+        ->toContain('filament::components.loading-placeholder');
 });
 
 it('finds only the loading indicator inside the lazy schema container', function () {
